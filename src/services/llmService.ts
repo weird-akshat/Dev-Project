@@ -1,4 +1,3 @@
-// src/services/llm.service.ts
 import { GoogleGenAI } from "@google/genai";
 import "dotenv/config";
 import { z } from "zod";
@@ -102,7 +101,7 @@ const marketingCampaignJsonSchema = {
 async function generateCampaign(prompt: string, context: Context) {
     const response = await ai.models.generateContent({
         model: "gemini-2.5-flash",
-        contents: prompt + context.brand + " " + context.products,
+        contents: prompt + " the products given are:  " + context.products + " Analyze the website" + "context.brand" + " and generate a marketing campaign in JSON format as per the given schema.",
         config: {
             responseMimeType: "application/json",
             responseSchema: marketingCampaignJsonSchema,
