@@ -1,10 +1,10 @@
 import { Request, Response } from "express";
-import { MessageRequest, MessageResponse } from "../types/message";
-import { generateCampaign } from "../services/llmService";
+import { GeneratedTemplate, MessageRequest, MessageResponse } from "../types/message";
+import { generateCampaign, generateImage } from "../services/llmService";
 
 export const generateTemplate = async (
     req: Request<{}, {}, MessageRequest>,
-    res: Response<MessageResponse>
+    res: Response<GeneratedTemplate>
 ) => {
     const { question, context } = req.body;
 
@@ -12,9 +12,16 @@ export const generateTemplate = async (
 
     const result = await generateCampaign(question, context);
 
+    let imageUrl = await generateImage(result.imageprompt.headline, result.imageprompt.prompt);
 
+    const response: GeneratedTemplate = {
+        image: {
+            headline: result.imageprompt.headline,
 
+            imagePrompt: result.imageprompt.prompt,
+            imageUrl: imageUrl,
+        },
+        template: result.template
+    }
 
-
-    res.json({ success: true, reply });
 };

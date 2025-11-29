@@ -3,6 +3,8 @@ import { GoogleGenAI } from "@google/genai";
 import "dotenv/config";
 import { z } from "zod";
 import { Context } from "../types/message";
+import * as fs from "node:fs";
+
 
 const ai = new GoogleGenAI({ apiKey: process.env.GOOGLE_API_KEY || "" });
 
@@ -21,7 +23,7 @@ const templateSchema = z.object({
 });
 
 const imagePromptSchema = z.object({
-    headline: z.string().describe("Short headline for the image creative"),
+    headline: z.string().describe("Short headline for the image creative for eg 'Buy 1 Get 1 Free'"),
     prompt: z.string().describe("A detailed prompt to generate an image for this campaign"),
 });
 
@@ -117,5 +119,33 @@ async function generateCampaign(prompt: string, context: Context) {
 
     return campaignData;
 }
-
 export { generateCampaign };
+
+async function generateImage(headline: string, prompt: string) {
+    const response = await ai.models.generateImages({
+        model: 'imagen-3.0-generate-002',
+        prompt: 'Robot holding a red skateboard',
+        config: {
+            numberOfImages: 1,
+        },
+    });
+    if (response.generatedImages && response.generatedImages.length > 0) {
+        const img = response.generatedImages[0];
+        if (!img) {
+            throw new Error("No image URL generated");
+        }
+        const imgData = img.image;
+        if (!imgData || !imgData.imageBytes) {
+            throw new Error("No image data generated");
+        }
+        const imgBytes = imgData.imageBytes;
+        const buffer = Buffer.from(imgBytes, "base64");
+        let idx = Date.now();
+        fs.writeFileSync(`imagen-${idx}.png`, buffer);
+
+        return "imagen-${idx}.png";
+    } else {
+        throw new Error("No images generated");
+    }
+}
+export { generateImage };
