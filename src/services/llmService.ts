@@ -122,7 +122,7 @@ async function generateCampaign(prompt: string, context: Context) {
 }
 export { generateCampaign };
 
-async function generateImage(headline: string, prompt: string) {
+async function generateImage(headline: string, prompt: string): Promise<string> {
 
     const encodedPrompt = encodeURIComponent(`${headline}, ${prompt}`);
 

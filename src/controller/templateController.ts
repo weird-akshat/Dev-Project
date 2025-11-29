@@ -10,18 +10,24 @@ export const generateTemplate = async (
 
     const reply = `Received from ${question}: ${context.brand}`;
 
-    const result = await generateCampaign(question, context);
+    try {
+        const result = await generateCampaign(question, context);
+        let imageUrl = await generateImage(result.imageprompt.headline, result.imageprompt.prompt);
 
-    let imageUrl = await generateImage(result.imageprompt.headline, result.imageprompt.prompt);
+        const response: GeneratedTemplate = {
+            image: {
+                headline: result.imageprompt.headline,
 
-    const response: GeneratedTemplate = {
-        image: {
-            headline: result.imageprompt.headline,
-
-            imagePrompt: result.imageprompt.prompt,
-            imageUrl: imageUrl,
-        },
-        template: result.template
+                imagePrompt: result.imageprompt.prompt,
+                imageUrl: imageUrl,
+            },
+            template: result.template
+        }
+        return res.status(200).json(response);
     }
-    return res.status(200).json(response);
+    catch (error) {
+        console.error("Error generating template:", error);
+        return res.status(500).json({ error: "Internal Server Error" } as any);
+    }
+
 };
